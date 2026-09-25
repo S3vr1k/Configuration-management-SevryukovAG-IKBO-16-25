@@ -29,7 +29,6 @@ printf '+'
 printf '%*s' "$((length + 2))" '' | tr ' ' '-'
 printf '+\n'
 ```
-Вывод:
 ![alt text](image-3.png)
 
 ## Задание 4
@@ -48,7 +47,6 @@ identifiers:
 
 grep -oE '[A-Za-z_][A-Za-z0-9_]*' "$1" | sort -u
 ```
-Вывод:
 ![alt text](image-4.png)
 
 ## Задание 5
@@ -72,7 +70,6 @@ sudo cp "$program" /usr/local/bin/
 
 echo "Program $(basename "$program") registered succesfully"
 ```
-Вывод
 ![alt text](image-5.png)
 
 ## Задание 6
@@ -101,7 +98,6 @@ do
     esac
 done
 ```
-Вывод:
 ![alt text](image-6.png)
 
 ## Задание 7
@@ -132,7 +128,6 @@ find "$1" -type f -exec shasum -a 256 {} \; |
         }
     }'
 ```
-Вывод:
 ![alt text](image-7.png)
 
 ## Задание 8
@@ -153,7 +148,6 @@ find "$directory" -type f -name "*.$extension" -print0 |
 
 echo "Created: $archive"
 ```
-Вывод:
 ![alt text](image-8.png)
 
 ## Задание 9
@@ -172,7 +166,6 @@ fi
 
 sed 's/    /\t/g' "$1" > "$2"
 ```
-Вывод:
 ![alt text](image-9.png)
 Возможно, на скриншоте не заметно, но программа заменила необходимые пробелы на знак табуляции
 
@@ -191,5 +184,4 @@ find "$1" -type f -size 0 \( \
 \) -print
 ```
 Для тестирования я создал 3 пустых текстовых файла.
-Вывод:
 ![alt text](image-10.png)
