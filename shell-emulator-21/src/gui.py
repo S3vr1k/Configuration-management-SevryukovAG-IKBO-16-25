@@ -3,6 +3,7 @@ import socket
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 
+from src.startup import run_script
 from src.shell import execute_command
 
 class EmulatorWindow:
@@ -29,7 +30,7 @@ class EmulatorWindow:
         self.entry.bind("<Return>", self.on_enter)
         self.entry.focus_set()
 
-        self.write("Этап 1. Доступные команды: ls, cd, exit.")
+        self.write("Этап 2. Доступные команды: ls, cd, exit.")
 
     def write(self, text):
         """Добавляет строку в историю"""
@@ -61,3 +62,15 @@ class EmulatorWindow:
             self.root.destroy()
 
         return "break"
+    def run_startup(self, options):
+        """Показывает параметры и выполняет стартовый скрипт."""
+        self.write(f"Путь к VFS: {options.vfs!r}")
+        self.write(f"Стартовый скрипт: {options.script!r}")
+
+        if options.script is None:
+            return
+
+        should_exit = run_script(options.script, self.write)
+
+        if should_exit:
+            self.root.destroy()
