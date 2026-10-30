@@ -1,0 +1,9 @@
+path,type,content_base64
+/,dir,
+/motd,file,V2VsY29tZSEK
+/docs,dir,
+/docs/projects,dir,
+/docs/projects/demo,dir,
+/docs/projects/demo/hello.txt,file,SGVsbG8K
+/docs/repeats.txt,file,YQphCmIKYgphCg==
+/empty,dir,

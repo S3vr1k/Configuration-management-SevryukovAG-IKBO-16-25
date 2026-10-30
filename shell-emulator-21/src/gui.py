@@ -5,12 +5,14 @@ from tkinter.scrolledtext import ScrolledText
 
 from src.startup import run_script
 from src.shell import execute_command
+from src.vfs import VirtualFileSystem, load_vfs
 
 class EmulatorWindow:
     """Графический интерфейс эмулятора"""
     def __init__(self, root):
         """Создаёт элементы окна и заголовок из данных ОС"""
         self.root = root
+        self.vfs = VirtualFileSystem()
 
         username = getpass.getuser()
         hostname = socket.gethostname()
@@ -30,7 +32,7 @@ class EmulatorWindow:
         self.entry.bind("<Return>", self.on_enter)
         self.entry.focus_set()
 
-        self.write("Этап 2. Доступные команды: ls, cd, exit.")
+        self.write("Этап 3. Доступные команды: ls, cd, exit.")
 
     def write(self, text):
         """Добавляет строку в историю"""
@@ -62,10 +64,28 @@ class EmulatorWindow:
             self.root.destroy()
 
         return "break"
+
     def run_startup(self, options):
-        """Показывает параметры и выполняет стартовый скрипт."""
+        """Загружает VFS, показывает motd и выполняет стартовый файл."""
         self.write(f"Путь к VFS: {options.vfs!r}")
         self.write(f"Стартовый скрипт: {options.script!r}")
+
+        try:
+            if options.vfs is None:
+                self.vfs = VirtualFileSystem()
+            else:
+                self.vfs = load_vfs(options.vfs)
+            motd = self.vfs.get_motd()
+        except (OSError, UnicodeError, ValueError) as error:
+            self.write(f"Ошибка загрузки VFS: {error}")
+            self.entry.configure(state=tk.DISABLED)
+            return
+
+        self.write(f"VFS загружена: {len(self.vfs.nodes)} узлов.")
+        for path in sorted(self.vfs.nodes):
+            self.write(f"  {path}")
+        if motd is not None:
+            self.write(motd.rstrip("\n"))
 
         if options.script is None:
             return

@@ -1,0 +1,6 @@
+path,type,content_base64
+/,dir,
+/motd,file,V2VsY29tZSEK
+/hello.txt,file,SGVsbG8K
+/data.bin,file,AP9B
+/empty,dir,

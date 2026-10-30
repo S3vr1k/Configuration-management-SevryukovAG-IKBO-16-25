@@ -1,0 +1,10 @@
+ls
+ls /
+ls ""
+ls "my folder"
+cd
+cd /docs/projects/demo
+cd "my folder"
+cd $HOME
+cd ${HOME}
+cd "$HOME"
