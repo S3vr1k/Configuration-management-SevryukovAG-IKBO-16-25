@@ -1,5 +1,7 @@
 import argparse
 from validation import validate_args
+from repository import get_direct_dependencies
+from urllib.error import HTTPError, URLError
 
 parser = argparse.ArgumentParser(
     description="Визуализация зависимостей пакетов Cargo"
@@ -51,11 +53,23 @@ parser.add_argument(
 args = parser.parse_args()
 validate_args(args, parser)
 
-#Вывод информации
-print(f"package={args.package}")
-print(f"version={args.version}")
-print(f"repository={args.repository}")
-print(f"output={args.output}")
-print(f"test={args.test}")
-print(f"ascii={args.ascii}")
-print(f"filter={args.filter}")
+try:
+    dependencies = get_direct_dependencies(
+        args.repository, args.package, args.version
+    )
+except HTTPError as error:
+    parser.error(f"Ошибка HTTP {error.code} при получении пакета")
+except URLError as error:
+    parser.error("Не удалось подключиться к репозиторию: {error.reason}")
+except TimeoutError as error:
+    parser.error("Истекло время ожидания ответа")
+except ValueError as error:
+    parser.error(str(error))
+
+if not dependencies:
+    print("У пакета нет зависимостей")
+else:
+    for dependency in dependencies:
+        name = dependency.get("package") or dependency["name"]
+        ver = dependency["req"]
+        print(f"{name}:{ver}")
