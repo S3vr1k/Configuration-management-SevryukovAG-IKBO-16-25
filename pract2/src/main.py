@@ -1,6 +1,7 @@
 import argparse
 from validation import validate_args
-from repository import get_direct_dependencies
+from source import create_source
+from graph import build_graph
 from urllib.error import HTTPError, URLError
 
 parser = argparse.ArgumentParser(
@@ -54,22 +55,31 @@ args = parser.parse_args()
 validate_args(args, parser)
 
 try:
-    dependencies = get_direct_dependencies(
-        args.repository, args.package, args.version
+    get_dependencies, resolve_version = create_source(
+        args.repository, args.test
+    )
+    graph = build_graph(
+        args.package, args.version, get_dependencies,
+        resolve_version, args.filter
     )
 except HTTPError as error:
     parser.error(f"Ошибка HTTP {error.code} при получении пакета")
 except URLError as error:
-    parser.error("Не удалось подключиться к репозиторию: {error.reason}")
+    parser.error(f"Не удалось подключиться: {error.reason}")
 except TimeoutError as error:
     parser.error("Истекло время ожидания ответа")
-except ValueError as error:
+except OSError as error:
+    parser.error(f"Ошибка чтения данных: {error}")
+except (ValueError, KeyError, TypeError) as error:
     parser.error(str(error))
 
-if not dependencies:
-    print("У пакета нет зависимостей")
+if not graph:
+    print("Граф пуст: исходный пакет исключен фильтром")
 else:
-    for dependency in dependencies:
-        name = dependency.get("package") or dependency["name"]
-        ver = dependency["req"]
-        print(f"{name}:{ver}")
+    for package, dependencies in graph.items():
+        name, version = package
+        children = ", ".join(
+            f"{child_name}@{child_version}"
+            for child_name, child_version in dependencies
+        )
+        print(f"{name}@{version}: {children or 'нет зависимостей'}")
