@@ -3,6 +3,7 @@ from validation import validate_args
 from source import create_source
 from graph import build_graph
 from order import get_load_order
+from visualization import save_graph, make_ascii_tree
 from urllib.error import HTTPError, URLError
 
 parser = argparse.ArgumentParser(
@@ -30,7 +31,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--output",
-    default="graph.svg",
+    default="output/graph.svg",
     help="Имя сгенерированного файла с изображением графа"
 )
 
@@ -71,6 +72,7 @@ try:
     )
     if args.order:
         order = get_load_order(graph)
+    save_graph(graph, args.output)
 except HTTPError as error:
     parser.error(f"Ошибка HTTP {error.code} при получении пакета")
 except URLError as error:
@@ -87,11 +89,6 @@ if not graph:
 elif args.order:
     for number, (name, version) in enumerate(order, start=1):
         print(f"{number}. {name}@{version}")
-else:
-    for package, dependencies in graph.items():
-        name, version = package
-        children = ", ".join(
-            f"{child_name}@{child_version}"
-            for child_name, child_version in dependencies
-        )
-        print(f"{name}@{version}: {children or 'нет зависимостей'}")
+if args.ascii:
+    print(make_ascii_tree(graph))
+print(f"Граф сохранен: {args.output}")
