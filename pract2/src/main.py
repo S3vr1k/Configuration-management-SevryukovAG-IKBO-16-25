@@ -2,6 +2,7 @@ import argparse
 from validation import validate_args
 from source import create_source
 from graph import build_graph
+from order import get_load_order
 from urllib.error import HTTPError, URLError
 
 parser = argparse.ArgumentParser(
@@ -51,6 +52,12 @@ parser.add_argument(
     help="Подстрока для фильтрации пакетов"
 )
 
+parser.add_argument(
+    "--order",
+    action="store_true",
+    help="Вывести порядок загрузки: зависимости перед пакетами"
+)
+
 args = parser.parse_args()
 validate_args(args, parser)
 
@@ -62,6 +69,8 @@ try:
         args.package, args.version, get_dependencies,
         resolve_version, args.filter
     )
+    if args.order:
+        order = get_load_order(graph)
 except HTTPError as error:
     parser.error(f"Ошибка HTTP {error.code} при получении пакета")
 except URLError as error:
@@ -75,6 +84,9 @@ except (ValueError, KeyError, TypeError) as error:
 
 if not graph:
     print("Граф пуст: исходный пакет исключен фильтром")
+elif args.order:
+    for number, (name, version) in enumerate(order, start=1):
+        print(f"{number}. {name}@{version}")
 else:
     for package, dependencies in graph.items():
         name, version = package
